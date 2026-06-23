@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>씨큐라 대시보드</title>
+<style>
+  :root{
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --line:#2a313c;
+    --txt:#e6edf3; --muted:#8b949e; --pos:#3fb950; --neg:#f85149;
+    --accent:#58a6ff; --bench:#d29922;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,"Segoe UI",Roboto,"Malgun Gothic","Apple SD Gothic Neo",sans-serif;
+    font-size:14px;line-height:1.45}
+  .wrap{max-width:1200px;margin:0 auto;padding:24px 20px 60px}
+  h1{font-size:34px;margin:0 0 4px;font-weight:700;text-align:center}
+  .sub{color:var(--muted);font-size:12.5px;text-align:center}
+  .bar{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;
+    background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    padding:14px 16px;margin:16px 0}
+  .bar label{display:block;font-size:11px;color:var(--muted);margin-bottom:4px}
+  input[type=date]{background:var(--panel2);border:1px solid var(--line);color:var(--txt);
+    border-radius:8px;padding:7px 9px;font-size:13px;color-scheme:dark}
+  /* 날짜 선택(달력) 아이콘을 흰색으로 — 어두운 배경에서 잘 보이도록 */
+  input[type=date]::-webkit-calendar-picker-indicator{
+    cursor:pointer; opacity:1; margin-left:4px;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='18' rx='2'/%3E%3Cline x1='3' y1='9' x2='21' y2='9'/%3E%3Cline x1='8' y1='2' x2='8' y2='6'/%3E%3Cline x1='16' y1='2' x2='16' y2='6'/%3E%3C/svg%3E");
+    background-repeat:no-repeat; background-position:center; background-size:17px 17px}
+  input[type=date]::-webkit-calendar-picker-indicator:hover{filter:brightness(0.8)}
+  button{background:var(--panel2);border:1px solid var(--line);color:var(--txt);
+    border-radius:8px;padding:7px 12px;font-size:12.5px;cursor:pointer}
+  button:hover{border-color:var(--accent)}
+  button.on{background:var(--accent);color:#0e1117;border-color:var(--accent);font-weight:600}
+  .seg{display:inline-flex;gap:6px}
+  .grow{flex:1}
+  table{width:100%;border-collapse:collapse;margin-top:6px;
+    background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  th,td{padding:10px 12px;text-align:right;border-bottom:1px solid var(--line);
+    font-variant-numeric:tabular-nums;white-space:nowrap}
+  th{background:var(--panel2);color:var(--muted);font-weight:600;font-size:12px;
+    position:sticky;top:0}
+  th:first-child,td:first-child{text-align:left}
+  tr:last-child td{border-bottom:none}
+  td.name{font-weight:600}
+  td.start{color:var(--muted);font-size:12px}
+  .pos{color:var(--pos)} .neg{color:var(--neg)} .na{color:var(--muted)}
+  tr.bench td{background:var(--panel2);color:var(--bench);font-weight:600}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    padding:16px;margin-top:18px}
+  .legend{display:flex;flex-wrap:wrap;gap:12px;margin:4px 0 10px;font-size:12px}
+  .lg{display:inline-flex;align-items:center;gap:6px;cursor:pointer;user-select:none}
+  .sw{width:11px;height:11px;border-radius:3px;display:inline-block}
+  .lg.off{opacity:.35;text-decoration:line-through}
+  svg{width:100%;height:auto;display:block}
+  .tip{font-size:11.5px;color:var(--muted);margin-top:8px}
+  .flag{display:inline-block;font-size:10px;color:var(--bench);
+    border:1px solid var(--bench);border-radius:4px;padding:0 4px;margin-left:6px;vertical-align:middle}
+  .err{color:var(--neg);padding:30px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>씨큐라 대시보드</h1>
+
+  <div class="bar">
+    <div>
+      <label>기준일 (과거일 입력 시 해당일 기준 재계산)</label>
+      <input type="date" id="asof">
+    </div>
+    <div>
+      <label>&nbsp;</label>
+      <button id="btnLatest">최신일로</button>
+    </div>
+    <div class="grow"></div>
+    <div>
+      <label>&nbsp;</label>
+      <div class="sub" id="genInfo" style="padding:7px 0;text-align:right"></div>
+    </div>
+  </div>
+
+  <div id="tableBox"></div>
+
+  <div class="card">
+    <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between">
+      <strong style="font-size:14px">누적 성과 (기준일 종료, 시작=100 리베이스)</strong>
+      <div class="seg" id="winSeg">
+        <button data-w="1">1M</button>
+        <button data-w="3">3M</button>
+        <button data-w="6">6M</button>
+        <button data-w="12" class="on">1Y</button>
+        <button data-w="0">전체</button>
+      </div>
+    </div>
+    <div class="legend" id="legend"></div>
+    <div id="chart"></div>
+  </div>
+
+  <div class="tip" style="margin-top:14px">
+    · 누적 = NAV ÷ 설정금액 − 1, CAGR 은 운용시작일~기준일 연환산<br>
+    · 운용기간이 1년 미만인 계좌는 연환산(CAGR)이 과장될 수 있어 <span class="na">—</span> 로 표시
+  </div>
+</div>
+
+<script src="data.js" onerror="window.__noDataJs=1"></script>
+<script>
+let DATA=null, WIN=12;
+const PALETTE=["#58a6ff","#3fb950","#db61a2","#e3b341","#f0883e","#a371f7","#56d4dd","#ff7b72"];
+
+const $=s=>document.querySelector(s);
+const iso=d=>d.toISOString().slice(0,10);
+const pdate=s=>new Date(s+"T00:00:00Z");
+function shift(s,months){const d=pdate(s);d.setUTCMonth(d.getUTCMonth()-months);return iso(d);}
+function fmtPct(x){if(x==null||!isFinite(x))return '<span class="na">—</span>';
+  const v=(x*100); const c=v>=0?'pos':'neg'; const s=v>=0?'+':'';
+  return `<span class="${c}">${s}${v.toFixed(2)}%</span>`;}
+function fmtKRW(x){if(x==null)return '—';
+  return Math.round(x).toLocaleString();}
+
+// 계좌별 설정금액(원금)은 .env(ACCOUNTS__<idx>__setamt)에서 읽어 data.js 로 전달된다.
+function getSetAmt(acc){const n=acc&&acc.setamt!=null?+acc.setamt:NaN;
+  return isFinite(n)&&n>0?n:null;}
+
+// arr: [[date, val, ...]] 오름차순. date<=target 인 마지막 항목 반환.
+function onOrBefore(arr,target,valIdx=1){
+  let lo=0,hi=arr.length-1,res=null;
+  while(lo<=hi){const m=(lo+hi)>>1;
+    if(arr[m][0]<=target){res=arr[m];lo=m+1;}else hi=m-1;}
+  return res?{date:res[0],val:res[valIdx]}:null;
+}
+function ret(arr,d0,d1,valIdx=1){
+  const a=onOrBefore(arr,d0,valIdx), b=onOrBefore(arr,d1,valIdx);
+  if(!a||!b||a.val<=0)return null;
+  // 시작 앵커가 윈도우 시작보다 너무 과거면(데이터 없음) null 처리는 호출부에서
+  return b.val/a.val-1;
+}
+
+function firstDate(arr){return arr.length?arr[0][0]:null;}
+
+function periodReturn(arr,asof,months){
+  if(!arr.length)return null;
+  const start = months===0 ? firstDate(arr) : shift(asof,months);
+  if(months!==0 && start < firstDate(arr)) return null; // 데이터 부족
+  return ret(arr,start,asof);
+}
+
+function showNoData(){
+  const g=$('#genInfo'); if(g)g.innerHTML='';
+  $('#tableBox').innerHTML=
+    `<div class="err">데이터를 불러올 수 없습니다.<br>먼저 <code>python run.py --demo</code> (미리보기) 또는 <code>python run.py</code> (실거래) 를 실행한 뒤 새로고침하세요.</div>`;
+}
+function load(){
+  // 1) data.js (script 태그, file:// 더블클릭 지원)
+  if(window.DASH_DATA){DATA=window.DASH_DATA;init();return;}
+  // 2) 로컬 서버로 열었을 때 data.json fetch 폴백
+  fetch('data.json?_='+Date.now()).then(r=>r.json()).then(d=>{DATA=d;init();})
+    .catch(showNoData);
+}
+
+function allDates(){
+  const set=new Set();
+  Object.values(DATA.series).forEach(s=>s.forEach(p=>set.add(p[0])));
+  return [...set].sort();
+}
+
+function init(){
+  const dates=allDates();
+  const latest=dates[dates.length-1];
+  const inp=$('#asof'); inp.min=dates[0]; inp.max=latest; inp.value=latest;
+  inp.onchange=render; $('#btnLatest').onclick=()=>{inp.value=latest;render();};
+  $('#winSeg').querySelectorAll('button').forEach(b=>b.onclick=()=>{
+    WIN=+b.dataset.w; $('#winSeg').querySelectorAll('button').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on'); drawChart();});
+  HIDDEN=new Set();
+  render();
+}
+
+function snapAsof(){ // 선택일 이하의 실제 스냅샷 날짜로 스냅
+  const dates=allDates(); const want=$('#asof').value;
+  let res=dates[0]; for(const d of dates){if(d<=want)res=d;} return res;
+}
+
+function benchReturn(asof,months){
+  const b=DATA.bench; if(!b||!b.length)return null;
+  const start=months===0?firstDate(b):shift(asof,months);
+  return ret(b,start,asof);
+}
+function benchCum(start,asof){return ret(DATA.bench,start,asof);}
+
+function render(){
+  const asof=snapAsof();
+  const periods=[["1M",1],["3M",3],["6M",6],["1Y",12]];
+  let head=`<tr><th>계좌</th><th>운용시작일</th><th>NAV(원)</th><th>설정금액(원)</th>`+
+    periods.map(p=>`<th>${p[0]}</th>`).join('')+`<th>누적</th><th>CAGR</th></tr>`;
+  let rows='';
+  for(const acc of DATA.accounts){
+    const s=DATA.series[String(acc.idx)]||[];
+    const last=onOrBefore(s,asof);
+    const nav=last?last.val:null;
+    // 시리즈에 nav 는 인덱스2
+    const navRow=s.length?onOrBefore(s,asof,2):null;
+    let cells='';
+    for(const[lbl,m] of periods){
+      cells+=`<td>${fmtPct(periodReturn(s,asof,m))}</td>`;
+    }
+    // 누적·CAGR = 설정금액(원금) 대비 현재 NAV 기준.
+    // 기간 = 운용시작일(acc.start)~기준일. (설정금액이 있으면 시작일 NAV 스냅샷 불필요)
+    const setamt=getSetAmt(acc);
+    const navVal=navRow?navRow.val:null;
+    const pStart=acc.start||firstDate(s);   // CAGR 연환산 기준 시작일
+    const pDays=pStart?(pdate(asof)-pdate(pStart))/864e5:0;
+    let cumShow=null, cagrShow=null;
+    if(setamt!=null && navVal!=null){
+      cumShow = navVal/setamt - 1;
+      // 운용기간 1년(365일) 미만이면 CAGR 은 빈칸으로 남김
+      if(pStart && pDays>=365) cagrShow=Math.pow(navVal/setamt,365.25/pDays)-1;
+    }
+    const amtCell=setamt!=null?setamt.toLocaleString():'<span class="na">—</span>';
+    rows+=`<tr><td class="name">${acc.name}</td>`+
+      `<td class="start">${acc.start||'—'}</td>`+
+      `<td>${navRow?fmtKRW(navRow.val):'—'}</td>`+
+      `<td>${amtCell}</td>`+
+      cells+`<td>${fmtPct(cumShow)}</td><td>${fmtPct(cagrShow)}</td></tr>`;
+  }
+  // 벤치마크 행
+  {
+    let bc='';
+    for(const[lbl,m] of periods) bc+=`<td>${fmtPct(benchReturn(asof,m))}</td>`;
+    const bAll=DATA.bench; const bFirst=bAll.length?bAll[0][0]:null;
+    // 운용시작일: .env BENCHMARK_START (보유 데이터 범위 내) 우선, 없으면 최초일
+    const bStart=(DATA.benchmark_start && bFirst && DATA.benchmark_start>=bFirst)?DATA.benchmark_start:bFirst;
+    const bcum=benchCum(bStart,asof);
+    let bcagr=null;
+    if(bcum!=null){const days=(pdate(asof)-pdate(bStart))/864e5; if(days>=365)bcagr=Math.pow(1+bcum,365.25/days)-1;}
+    rows+=`<tr class="bench"><td>${DATA.benchmark_name} (벤치)</td><td class="start">${bStart||''}</td><td>—</td><td>—</td>`+
+      bc+`<td>${fmtPct(bcum)}</td><td>${fmtPct(bcagr)}</td></tr>`;
+  }
+  $('#tableBox').innerHTML=`<table>${head}${rows}</table>`;
+  $('#genInfo').innerHTML=`생성일 ${DATA.generated_at}`;
+  drawLegend(); drawChart();
+}
+
+let HIDDEN=new Set();
+function drawLegend(){
+  let h='';
+  DATA.accounts.forEach((a,i)=>{
+    const off=HIDDEN.has('a'+a.idx)?' off':'';
+    h+=`<span class="lg${off}" data-k="a${a.idx}"><span class="sw" style="background:${PALETTE[i%PALETTE.length]}"></span>${a.name}</span>`;
+  });
+  const offb=HIDDEN.has('bench')?' off':'';
+  h+=`<span class="lg${offb}" data-k="bench"><span class="sw" style="background:var(--bench)"></span>${DATA.benchmark_name}</span>`;
+  $('#legend').innerHTML=h;
+  $('#legend').querySelectorAll('.lg').forEach(el=>el.onclick=()=>{
+    const k=el.dataset.k; if(HIDDEN.has(k))HIDDEN.delete(k);else HIDDEN.add(k);
+    drawLegend();drawChart();});
+}
+
+function drawChart(){
+  const asof=snapAsof();
+  const start = WIN===0 ? null : shift(asof,WIN);
+  // 각 라인: 윈도우 구간 [start,asof] 추출 후 시작점=100 리베이스
+  const lines=[];
+  DATA.accounts.forEach((a,i)=>{
+    if(HIDDEN.has('a'+a.idx))return;
+    const s=DATA.series[String(a.idx)]||[];
+    const pts=clip(s,start,asof,1); if(pts.length<2)return;
+    lines.push({color:PALETTE[i%PALETTE.length],pts:rebase(pts),name:a.name});
+  });
+  if(!HIDDEN.has('bench')){
+    const pts=clip(DATA.bench,start,asof,1);
+    if(pts.length>=2)lines.push({color:'#d29922',pts:rebase(pts),name:DATA.benchmark_name,dash:true});
+  }
+  renderSVG(lines);
+}
+function clip(arr,start,end,vi){
+  // start 보다 이전의 마지막 점을 앵커로 포함
+  const out=[]; let anchor=null;
+  for(const p of arr){ if(start && p[0]<start){anchor=p;continue;} if(p[0]>end)break; out.push([p[0],p[vi]]); }
+  if(start && anchor && (!out.length||out[0][0]>start)) out.unshift([start,anchor[vi]]);
+  return out;
+}
+function rebase(pts){const b=pts[0][1]; return pts.map(p=>[p[0], b>0?p[1]/b*100:100]);}
+
+function renderSVG(lines){
+  const W=1120,H=300,P={l:46,r:14,t:14,b:26};
+  if(!lines.length){$('#chart').innerHTML='<div class="tip">표시할 데이터가 없습니다.</div>';return;}
+  let min=Infinity,max=-Infinity,dmin=null,dmax=null;
+  lines.forEach(l=>l.pts.forEach(p=>{min=Math.min(min,p[1]);max=Math.max(max,p[1]);
+    if(dmin==null||p[0]<dmin)dmin=p[0]; if(dmax==null||p[0]>dmax)dmax=p[0];}));
+  const pad=(max-min)*0.08||1; min-=pad; max+=pad;
+  const t0=pdate(dmin).getTime(), t1=pdate(dmax).getTime()||t0+1;
+  const x=d=>P.l+(pdate(d).getTime()-t0)/(t1-t0||1)*(W-P.l-P.r);
+  const y=v=>P.t+(1-(v-min)/(max-min||1))*(H-P.t-P.b);
+  let g='';
+  // 100 기준선
+  if(min<100&&max>100){const yy=y(100);g+=`<line x1="${P.l}" y1="${yy}" x2="${W-P.r}" y2="${yy}" stroke="#2a313c" stroke-dasharray="3 3"/>`;}
+  // y축 눈금
+  for(let k=0;k<=4;k++){const v=min+(max-min)*k/4;const yy=y(v);
+    g+=`<line x1="${P.l}" y1="${yy}" x2="${W-P.r}" y2="${yy}" stroke="#1c232d"/>`+
+       `<text x="${P.l-6}" y="${yy+3}" fill="#8b949e" font-size="10" text-anchor="end">${v.toFixed(0)}</text>`;}
+  // x축 라벨(시작/끝)
+  g+=`<text x="${P.l}" y="${H-8}" fill="#8b949e" font-size="10">${dmin}</text>`+
+     `<text x="${W-P.r}" y="${H-8}" fill="#8b949e" font-size="10" text-anchor="end">${dmax}</text>`;
+  lines.forEach(l=>{
+    const d=l.pts.map((p,i)=>(i?'L':'M')+x(p[0]).toFixed(1)+' '+y(p[1]).toFixed(1)).join(' ');
+    const end=l.pts[l.pts.length-1];
+    g+=`<path d="${d}" fill="none" stroke="${l.color}" stroke-width="1.8" ${l.dash?'stroke-dasharray="5 4"':''}/>`;
+    g+=`<circle cx="${x(end[0])}" cy="${y(end[1])}" r="2.6" fill="${l.color}"/>`;
+  });
+  $('#chart').innerHTML=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">${g}</svg>`;
+}
+
+load();
+</script>
+</body>
+</html>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         

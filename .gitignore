@@ -1,0 +1,10 @@
+# 시크릿/실데이터 — 절대 공유/커밋 금지
+.env
+data/
+data.js
+data.json
+cashflows.csv
+
+# 파이썬
+__pycache__/
+*.pyc
