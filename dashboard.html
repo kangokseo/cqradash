@@ -192,7 +192,7 @@ function render(){
   const asof=snapAsof();
   const periods=[["1M",1],["3M",3],["6M",6],["1Y",12]];
   let head=`<tr><th>계좌</th><th>운용시작일</th><th>NAV(원)</th><th>설정금액(원)</th>`+
-    periods.map(p=>`<th>${p[0]}</th>`).join('')+`<th>누적</th><th>CAGR</th></tr>`;
+    periods.map(p=>`<th>${p[0]}</th>`).join('')+`<th>누적</th><th>CAGR</th><th>MDD</th></tr>`;
   let rows='';
   for(const acc of DATA.accounts){
     const s=DATA.series[String(acc.idx)]||[];
@@ -217,11 +217,12 @@ function render(){
       if(pStart && pDays>=365) cagrShow=Math.pow(navVal/setamt,365.25/pDays)-1;
     }
     const amtCell=setamt!=null?setamt.toLocaleString():'<span class="na">—</span>';
+    const mdd=maxDD(s,pStart,asof,1);
     rows+=`<tr><td class="name">${acc.name}</td>`+
       `<td class="start">${acc.start||'—'}</td>`+
       `<td>${navRow?fmtKRW(navRow.val):'—'}</td>`+
       `<td>${amtCell}</td>`+
-      cells+`<td>${fmtPct(cumShow)}</td><td>${fmtPct(cagrShow)}</td></tr>`;
+      cells+`<td>${fmtPct(cumShow)}</td><td>${fmtPct(cagrShow)}</td><td>${fmtMDD(mdd)}</td></tr>`;
   }
   // 벤치마크 행
   {
@@ -233,8 +234,9 @@ function render(){
     const bcum=benchCum(bStart,asof);
     let bcagr=null;
     if(bcum!=null){const days=(pdate(asof)-pdate(bStart))/864e5; if(days>=365)bcagr=Math.pow(1+bcum,365.25/days)-1;}
+    const bmdd=maxDD(DATA.bench,bStart,asof,1);
     rows+=`<tr class="bench"><td>${DATA.benchmark_name} (벤치)</td><td class="start">${bStart||''}</td><td>—</td><td>—</td>`+
-      bc+`<td>${fmtPct(bcum)}</td><td>${fmtPct(bcagr)}</td></tr>`;
+      bc+`<td>${fmtPct(bcum)}</td><td>${fmtPct(bcagr)}</td><td>${fmtMDD(bmdd)}</td></tr>`;
   }
   $('#tableBox').innerHTML=`<table>${head}${rows}</table>`;
   $('#genInfo').innerHTML=`생성일 ${DATA.generated_at}`;
@@ -284,6 +286,19 @@ function clip(arr,start,end,vi){
   return out;
 }
 function rebase(pts){const b=pts[0][1]; return pts.map(p=>[p[0], b>0?p[1]/b*100:100]);}
+// 최대낙폭(MDD): [start,asof] 구간의 최고점 대비 최대 하락률 (<=0)
+function maxDD(arr,start,asof,vi){
+  const pts=clip(arr,start,asof,vi);
+  if(pts.length<2)return null;
+  let peak=-Infinity, mdd=0;
+  for(const p of pts){const v=p[1]; if(v==null||!isFinite(v))continue;
+    if(v>peak)peak=v;
+    if(peak>0){const dd=v/peak-1; if(dd<mdd)mdd=dd;}}
+  return mdd;
+}
+function fmtMDD(x){if(x==null||!isFinite(x))return '<span class="na">\u2014</span>';
+  const v=x*100; const c=v<0?'neg':'na';
+  return `<span class="${c}">${v.toFixed(2)}%</span>`;}
 
 function renderSVG(lines){
   const W=1120,H=300,P={l:46,r:14,t:14,b:26};
