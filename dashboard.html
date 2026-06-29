@@ -239,7 +239,7 @@ function render(){
       bc+`<td>${fmtPct(bcum)}</td><td>${fmtPct(bcagr)}</td><td>${fmtMDD(bmdd)}</td></tr>`;
   }
   $('#tableBox').innerHTML=`<table>${head}${rows}</table>`;
-  $('#genInfo').innerHTML=`생성일 ${DATA.generated_at}`;
+  $('#genInfo').innerHTML=`업데이트: ${DATA.generated_at}`;
   drawLegend(); drawChart();
 }
 
