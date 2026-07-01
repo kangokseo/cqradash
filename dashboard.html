@@ -3,52 +3,53 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>씨큐라 대시보드</title>
+<title>씨큐라 수익률 대시보드</title>
 <style>
   :root{
-    --bg:#0e1117; --panel:#161b22; --panel2:#1c232d; --line:#2a313c;
-    --txt:#e6edf3; --muted:#8b949e; --pos:#3fb950; --neg:#f85149;
-    --accent:#58a6ff; --bench:#d29922;
+    --bg:#ffffff; --panel:#ffffff; --panel2:#f6f7f9; --line:#e6e8eb;
+    --txt:#111827; --muted:#6b7280; --pos:#16a34a; --neg:#dc2626;
+    --accent:#2563eb; --bench:#d97706;
+    --shadow:0 1px 2px rgba(16,24,40,.06),0 1px 3px rgba(16,24,40,.10);
   }
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--txt);
     font-family:-apple-system,"Segoe UI",Roboto,"Malgun Gothic","Apple SD Gothic Neo",sans-serif;
-    font-size:14px;line-height:1.45}
-  .wrap{max-width:1200px;margin:0 auto;padding:24px 20px 60px}
-  h1{font-size:34px;margin:0 0 4px;font-weight:700;text-align:center}
+    font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1200px;margin:0 auto;padding:32px 20px 64px}
+  h1{font-size:44px;margin:0 0 4px;font-weight:800;text-align:center;letter-spacing:-.02em}
   .sub{color:var(--muted);font-size:12.5px;text-align:center}
   .bar{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;
-    background:var(--panel);border:1px solid var(--line);border-radius:12px;
-    padding:14px 16px;margin:16px 0}
+    background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    padding:14px 16px;margin:20px 0;box-shadow:var(--shadow)}
   .bar label{display:block;font-size:11px;color:var(--muted);margin-bottom:4px}
-  input[type=date]{background:var(--panel2);border:1px solid var(--line);color:var(--txt);
-    border-radius:8px;padding:7px 9px;font-size:13px;color-scheme:dark}
-  /* 날짜 선택(달력) 아이콘을 흰색으로 — 어두운 배경에서 잘 보이도록 */
+  input[type=date]{background:#fff;border:1px solid var(--line);color:var(--txt);
+    border-radius:9px;padding:7px 9px;font-size:13px;color-scheme:light}
   input[type=date]::-webkit-calendar-picker-indicator{
-    cursor:pointer; opacity:1; margin-left:4px;
-    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='18' rx='2'/%3E%3Cline x1='3' y1='9' x2='21' y2='9'/%3E%3Cline x1='8' y1='2' x2='8' y2='6'/%3E%3Cline x1='16' y1='2' x2='16' y2='6'/%3E%3C/svg%3E");
+    cursor:pointer; opacity:.7; margin-left:4px;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='18' rx='2'/%3E%3Cline x1='3' y1='9' x2='21' y2='9'/%3E%3Cline x1='8' y1='2' x2='8' y2='6'/%3E%3Cline x1='16' y1='2' x2='16' y2='6'/%3E%3C/svg%3E");
     background-repeat:no-repeat; background-position:center; background-size:17px 17px}
-  input[type=date]::-webkit-calendar-picker-indicator:hover{filter:brightness(0.8)}
-  button{background:var(--panel2);border:1px solid var(--line);color:var(--txt);
-    border-radius:8px;padding:7px 12px;font-size:12.5px;cursor:pointer}
-  button:hover{border-color:var(--accent)}
-  button.on{background:var(--accent);color:#0e1117;border-color:var(--accent);font-weight:600}
+  input[type=date]::-webkit-calendar-picker-indicator:hover{opacity:1}
+  button{background:#fff;border:1px solid var(--line);color:var(--txt);
+    border-radius:9px;padding:7px 12px;font-size:12.5px;cursor:pointer;transition:border-color .12s,color .12s}
+  button:hover{border-color:var(--accent);color:var(--accent)}
+  button.on{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:600}
   .seg{display:inline-flex;gap:6px}
   .grow{flex:1}
   table{width:100%;border-collapse:collapse;margin-top:6px;
-    background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}
-  th,td{padding:10px 12px;text-align:right;border-bottom:1px solid var(--line);
+    background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:var(--shadow)}
+  th,td{padding:11px 13px;text-align:right;border-bottom:1px solid var(--line);
     font-variant-numeric:tabular-nums;white-space:nowrap}
-  th{background:var(--panel2);color:var(--muted);font-weight:600;font-size:12px;
-    position:sticky;top:0}
+  th{background:var(--panel2);color:var(--muted);font-weight:600;font-size:11.5px;
+    letter-spacing:.02em;position:sticky;top:0}
   th:first-child,td:first-child{text-align:left}
+  tbody tr:hover td{background:#fafbfc}
   tr:last-child td{border-bottom:none}
   td.name{font-weight:600}
   td.start{color:var(--muted);font-size:12px}
   .pos{color:var(--pos)} .neg{color:var(--neg)} .na{color:var(--muted)}
-  tr.bench td{background:var(--panel2);color:var(--bench);font-weight:600}
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;
-    padding:16px;margin-top:18px}
+  tr.bench td{background:#fffbeb;color:var(--bench);font-weight:600}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    padding:18px;margin-top:18px;box-shadow:var(--shadow)}
   .legend{display:flex;flex-wrap:wrap;gap:12px;margin:4px 0 10px;font-size:12px}
   .lg{display:inline-flex;align-items:center;gap:6px;cursor:pointer;user-select:none}
   .sw{width:11px;height:11px;border-radius:3px;display:inline-block}
@@ -62,20 +63,18 @@
 </head>
 <body>
 <div class="wrap">
-  <h1>씨큐라 대시보드</h1>
+  <h1>씨큐라 수익률 대시보드</h1>
 
   <div class="bar">
-    <div>
-      <label>기준일 (과거일 입력 시 해당일 기준 재계산)</label>
+    <div style="display:flex;align-items:center;gap:8px">
+      <label style="margin:0">기준일</label>
       <input type="date" id="asof">
     </div>
     <div>
-      <label>&nbsp;</label>
       <button id="btnLatest">최신일로</button>
     </div>
     <div class="grow"></div>
     <div>
-      <label>&nbsp;</label>
       <div class="sub" id="genInfo" style="padding:7px 0;text-align:right"></div>
     </div>
   </div>
@@ -87,9 +86,9 @@
     · 운용기간이 1년 미만인 계좌는 연환산(CAGR)이 과장될 수 있어 <span class="na">—</span> 로 표시
   </div>
 
+  <div style="font-size:16px;font-weight:700;margin:22px 0 10px">누적수익률 (%)</div>
   <div class="card">
     <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between">
-      <strong style="font-size:14px">누적 성과 (기준일 종료, 시작=100 리베이스)</strong>
       <div class="seg" id="winSeg">
         <button data-w="1">1M</button>
         <button data-w="3">3M</button>
@@ -97,16 +96,23 @@
         <button data-w="12" class="on">1Y</button>
         <button data-w="0">전체</button>
       </div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:11px;color:var(--muted)">
+        <span>구간 직접 선택</span>
+        <input type="date" id="cStart" style="padding:4px 7px;font-size:12px">
+        <span>~</span>
+        <input type="date" id="cEnd" style="padding:4px 7px;font-size:12px">
+        <button id="cClear">지우기</button>
+      </div>
     </div>
-    <div class="legend" id="legend"></div>
     <div id="chart"></div>
+    <div class="legend" id="legend" style="margin-top:10px"></div>
   </div>
 </div>
 
 <script src="data.js" onerror="window.__noDataJs=1"></script>
 <script>
 let DATA=null, WIN=12;
-const PALETTE=["#58a6ff","#3fb950","#db61a2","#e3b341","#f0883e","#a371f7","#56d4dd","#ff7b72"];
+const PALETTE=["#2563eb","#16a34a","#db2777","#7c3aed","#ea580c","#0891b2","#dc2626","#4f46e5"];
 
 const $=s=>document.querySelector(s);
 const iso=d=>d.toISOString().slice(0,10);
@@ -170,8 +176,13 @@ function init(){
   const inp=$('#asof'); inp.min=dates[0]; inp.max=latest; inp.value=latest;
   inp.onchange=render; $('#btnLatest').onclick=()=>{inp.value=latest;render();};
   $('#winSeg').querySelectorAll('button').forEach(b=>b.onclick=()=>{
-    WIN=+b.dataset.w; $('#winSeg').querySelectorAll('button').forEach(x=>x.classList.remove('on'));
-    b.classList.add('on'); drawChart();});
+    WIN=b.dataset.w==='acct'?'acct':+b.dataset.w; $('#winSeg').querySelectorAll('button').forEach(x=>x.classList.remove('on'));
+    $('#cStart').value=''; $('#cEnd').value=''; b.classList.add('on'); drawChart();});
+  ['cStart','cEnd'].forEach(id=>{const e=$('#'+id); e.min=dates[0]; e.max=latest;
+    e.onchange=()=>{$('#winSeg').querySelectorAll('button').forEach(x=>x.classList.remove('on')); drawChart();};});
+  $('#cClear').onclick=()=>{$('#cStart').value=''; $('#cEnd').value=''; WIN=12;
+    $('#winSeg').querySelectorAll('button').forEach(x=>x.classList.remove('on'));
+    const b=$('#winSeg button[data-w="12"]'); if(b)b.classList.add('on'); drawChart();};
   HIDDEN=new Set();
   render();
 }
@@ -259,22 +270,40 @@ function drawLegend(){
 }
 
 function drawChart(){
-  const asof=snapAsof();
-  const start = WIN===0 ? null : shift(asof,WIN);
-  // 각 라인: 윈도우 구간 [start,asof] 추출 후 시작점=100 리베이스
+  const cs=$('#cStart').value, ce=$('#cEnd').value;
+  const asof = ce || snapAsof();
+  let start;
+  if(cs){ start=cs; }
+  else if(WIN==='acct'){
+    // 계좌 뷰: x축을 계좌 데이터 최초일~기준일로 확대 (벤치마크도 동일 구간으로 축소)
+    let mn=null; DATA.accounts.forEach(a=>{const s=DATA.series[String(a.idx)]||[];
+      if(s.length){const f=s[0][0]; if(mn==null||f<mn)mn=f;}});
+    start=mn;
+  } else {
+    start = WIN===0 ? null : shift(asof,WIN);
+  }
+  // 각 라인: 윈도우 구간 [start,asof] 추출 후 시작점=0 리베이스
   const lines=[];
   DATA.accounts.forEach((a,i)=>{
     if(HIDDEN.has('a'+a.idx))return;
     const s=DATA.series[String(a.idx)]||[];
-    const pts=clip(s,start,asof,1); if(pts.length<2)return;
-    lines.push({color:PALETTE[i%PALETTE.length],pts:rebase(pts),name:a.name});
+    const setamt=getSetAmt(a); if(setamt==null)return;
+    // 누적수익률(원금 대비) = navVal/설정금액 - 1  (표의 '누적'과 동일)
+    const cum=s.filter(p=>p[2]!=null).map(p=>[p[0],(p[2]/setamt-1)*100]);
+    const pts=clip(cum,start,asof,1); if(pts.length<1)return;
+    lines.push({color:PALETTE[i%PALETTE.length],pts:pts,name:a.name});
   });
   if(!HIDDEN.has('bench')){
-    // 벤치마크는 benchmark_start(2024-11-04) 이전 구간은 표시하지 않음
-    const bs=DATA.benchmark_start||null;
-    const bStartClip=bs?((start&&start>bs)?start:bs):start;
-    const pts=clip(DATA.bench,bStartClip,asof,1);
-    if(pts.length>=2)lines.push({color:'#d29922',pts:rebase(pts),name:DATA.benchmark_name,dash:true});
+    // 벤치마크 누적수익률 = bench(기준일)/bench(benchmark_start) - 1
+    const bs=DATA.benchmark_start||null, bAll=DATA.bench;
+    const baseRow=onOrBefore(bAll, bs||(bAll[0]&&bAll[0][0]), 1);
+    const base=baseRow?baseRow.val:(bAll[0]?bAll[0][1]:null);
+    if(base){
+      const cum=bAll.map(p=>[p[0],(p[1]/base-1)*100]);
+      const bStartClip=bs?((start&&start>bs)?start:bs):start;
+      const pts=clip(cum,bStartClip,asof,1);
+      if(pts.length>=2)lines.push({color:'#d97706',pts:pts,name:DATA.benchmark_name,dash:true});
+    }
   }
   renderSVG(lines);
 }
@@ -285,7 +314,7 @@ function clip(arr,start,end,vi){
   if(start && anchor && (!out.length||out[0][0]>start)) out.unshift([start,anchor[vi]]);
   return out;
 }
-function rebase(pts){const b=pts[0][1]; return pts.map(p=>[p[0], b>0?p[1]/b*100:100]);}
+function rebase(pts){const b=pts[0][1]; return pts.map(p=>[p[0], b>0?(p[1]/b*100-100):0]);}
 // 최대낙폭(MDD): [start,asof] 구간의 최고점 대비 최대 하락률 (<=0)
 function maxDD(arr,start,asof,vi){
   const pts=clip(arr,start,asof,vi);
@@ -296,7 +325,7 @@ function maxDD(arr,start,asof,vi){
     if(peak>0){const dd=v/peak-1; if(dd<mdd)mdd=dd;}}
   return mdd;
 }
-function fmtMDD(x){if(x==null||!isFinite(x))return '<span class="na">—</span>';
+function fmtMDD(x){if(x==null||!isFinite(x))return '<span class="na">\u2014</span>';
   const v=x*100; const c=v<0?'neg':'na';
   return `<span class="${c}">${v.toFixed(2)}%</span>`;}
 
@@ -313,14 +342,14 @@ function renderSVG(lines){
   const y=v=>P.t+(1-(v-min)/(max-min||1))*(H-P.t-P.b);
   let g='';
   // 100 기준선
-  if(min<100&&max>100){const yy=y(100);g+=`<line x1="${P.l}" y1="${yy}" x2="${W-P.r}" y2="${yy}" stroke="#2a313c" stroke-dasharray="3 3"/>`;}
+  if(min<0&&max>0){const yy=y(0);g+=`<line x1="${P.l}" y1="${yy}" x2="${W-P.r}" y2="${yy}" stroke="#cbd0d6" stroke-dasharray="3 3"/>`;}
   // y축 눈금
   for(let k=0;k<=4;k++){const v=min+(max-min)*k/4;const yy=y(v);
-    g+=`<line x1="${P.l}" y1="${yy}" x2="${W-P.r}" y2="${yy}" stroke="#1c232d"/>`+
-       `<text x="${P.l-6}" y="${yy+3}" fill="#8b949e" font-size="10" text-anchor="end">${v.toFixed(0)}</text>`;}
+    g+=`<line x1="${P.l}" y1="${yy}" x2="${W-P.r}" y2="${yy}" stroke="#eef0f2"/>`+
+       `<text x="${P.l-6}" y="${yy+3}" fill="#9ca3af" font-size="10" text-anchor="end">${v.toFixed(0)}</text>`;}
   // x축 라벨(시작/끝)
-  g+=`<text x="${P.l}" y="${H-8}" fill="#8b949e" font-size="10">${dmin}</text>`+
-     `<text x="${W-P.r}" y="${H-8}" fill="#8b949e" font-size="10" text-anchor="end">${dmax}</text>`;
+  g+=`<text x="${P.l}" y="${H-8}" fill="#9ca3af" font-size="10">${dmin}</text>`+
+     `<text x="${W-P.r}" y="${H-8}" fill="#9ca3af" font-size="10" text-anchor="end">${dmax}</text>`;
   lines.forEach(l=>{
     const d=l.pts.map((p,i)=>(i?'L':'M')+x(p[0]).toFixed(1)+' '+y(p[1]).toFixed(1)).join(' ');
     const end=l.pts[l.pts.length-1];
@@ -332,7 +361,7 @@ function renderSVG(lines){
   chart.innerHTML=`<svg id="chartSvg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" style="overflow:visible">${g}</svg>`;
   // 호버 툴팁
   const tip=document.createElement('div');
-  tip.style.cssText='position:absolute;pointer-events:none;display:none;background:#0d1117f2;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:11.5px;color:var(--txt);z-index:5;white-space:nowrap;box-shadow:0 4px 14px #0008;min-width:120px';
+  tip.style.cssText='position:absolute;pointer-events:none;display:none;background:#ffffff;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:11.5px;color:var(--txt);z-index:5;white-space:nowrap;box-shadow:0 6px 18px rgba(16,24,40,.15);min-width:120px';
   chart.appendChild(tip);
   const svg=document.getElementById('chartSvg'), hov=document.getElementById('hov');
   const dset=new Set(); lines.forEach(l=>l.pts.forEach(p=>dset.add(p[0])));
@@ -344,10 +373,10 @@ function renderSVG(lines){
     const tt=t0+((sx-P.l)/((W-P.l-P.r)||1))*(t1-t0);
     let bi=0,bd=Infinity; for(let i=0;i<times.length;i++){const dd=Math.abs(times[i]-tt);if(dd<bd){bd=dd;bi=i;}}
     const d=dates[bi], cx=x(d);
-    let marks=`<line x1="${cx}" y1="${P.t}" x2="${cx}" y2="${H-P.b}" stroke="#8b949e" stroke-dasharray="3 3"/>`, rows='';
+    let marks=`<line x1="${cx}" y1="${P.t}" x2="${cx}" y2="${H-P.b}" stroke="#9ca3af" stroke-dasharray="3 3"/>`, rows='';
     lines.forEach(l=>{const v=valAt(l,d); if(v==null)return;
-      marks+=`<circle cx="${cx}" cy="${y(v)}" r="3.4" fill="${l.color}" stroke="#0e1117" stroke-width="1.2"/>`;
-      const pct=v-100, c=pct>=0?'#3fb950':'#f85149', s=pct>=0?'+':'';
+      marks+=`<circle cx="${cx}" cy="${y(v)}" r="3.4" fill="${l.color}" stroke="#ffffff" stroke-width="1.2"/>`;
+      const pct=v, c=pct>=0?'#16a34a':'#dc2626', s=pct>=0?'+':'';
       rows+=`<div style="display:flex;gap:8px;align-items:center;margin-top:3px"><span style="width:9px;height:9px;border-radius:2px;background:${l.color};flex:none"></span><span style="flex:1">${l.name}</span><span style="color:${c};font-variant-numeric:tabular-nums">${s}${pct.toFixed(2)}%</span></div>`;});
     hov.innerHTML=marks;
     tip.innerHTML=`<div style="color:var(--muted);margin-bottom:2px">${d}</div>${rows}`;
@@ -366,3 +395,4 @@ load();
 </script>
 </body>
 </html>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
