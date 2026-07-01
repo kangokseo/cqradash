@@ -9,7 +9,7 @@
     --bg:#ffffff; --panel:#ffffff; --panel2:#f6f7f9; --line:#e6e8eb;
     --txt:#111827; --muted:#6b7280; --pos:#16a34a; --neg:#dc2626;
     --accent:#2563eb; --bench:#d97706;
-    --shadow:0 1px 2px rgba(16,24,40,.06),0 1px 3px rgba(16,24,40,.10);
+    --shadow:none;
   }
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--txt);
@@ -19,8 +19,8 @@
   h1{font-size:30px;margin:0 0 4px;font-weight:700;text-align:center;letter-spacing:-.02em}
   .sub{color:var(--muted);font-size:12.5px;text-align:center}
   .bar{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;
-    background:var(--panel);border:1px solid var(--line);border-radius:14px;
-    padding:14px 16px;margin:20px 0;box-shadow:var(--shadow)}
+    background:var(--panel2);border:none;border-radius:14px;
+    padding:14px 16px;margin:20px 0}
   .bar label{display:block;font-size:11px;color:var(--muted);margin-bottom:4px}
   input[type=date]{background:#fff;border:1px solid var(--line);color:var(--txt);
     border-radius:9px;padding:7px 9px;font-size:13px;color-scheme:light}
@@ -36,7 +36,7 @@
   .seg{display:inline-flex;gap:6px}
   .grow{flex:1}
   table{width:100%;border-collapse:collapse;margin-top:6px;
-    background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:var(--shadow)}
+    background:var(--panel);border:none;border-radius:14px;overflow:hidden}
   th,td{padding:11px 13px;text-align:right;border-bottom:1px solid var(--line);
     font-variant-numeric:tabular-nums;white-space:nowrap}
   th{background:var(--panel2);color:var(--muted);font-weight:600;font-size:11.5px;
@@ -47,9 +47,11 @@
   td.name{font-weight:600}
   td.start{color:var(--muted);font-size:12px}
   .pos{color:var(--pos)} .neg{color:var(--neg)} .na{color:var(--muted)}
-  tr.bench td{background:#fffbeb;color:var(--bench);font-weight:600}
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;
-    padding:18px;margin-top:18px;box-shadow:var(--shadow)}
+  tr.bench td{color:var(--bench);font-weight:600;border-bottom:1px solid var(--line)}
+  tr.bench td.name{color:var(--txt)}
+  tr.bench td.start{color:var(--muted);font-weight:400}
+  .card{background:var(--panel2);border:none;border-radius:14px;
+    padding:18px;margin-top:18px}
   .legend{display:flex;flex-wrap:wrap;gap:12px;margin:4px 0 10px;font-size:12px}
   .lg{display:inline-flex;align-items:center;gap:6px;cursor:pointer;user-select:none}
   .sw{width:11px;height:11px;border-radius:3px;display:inline-block}
@@ -81,12 +83,12 @@
 
   <div id="tableBox"></div>
 
-  <div class="tip" style="margin-top:14px">
+  <div class="tip" style="margin-top:14px;text-align:right">
     · 누적 = NAV ÷ 설정금액 − 1, CAGR 은 운용시작일~기준일 연환산<br>
     · 운용기간이 1년 미만인 계좌는 연환산(CAGR)이 과장될 수 있어 <span class="na">—</span> 로 표시
   </div>
 
-  <div style="font-size:16px;font-weight:700;margin:22px 0 10px">누적수익률 (%)</div>
+  <div style="font-size:16px;font-weight:700;margin:22px 0 10px;text-align:left">누적수익률 (%)</div>
   <div class="card">
     <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between">
       <div class="seg" id="winSeg">
@@ -246,7 +248,7 @@ function render(){
     let bcagr=null;
     if(bcum!=null){const days=(pdate(asof)-pdate(bStart))/864e5; if(days>=365)bcagr=Math.pow(1+bcum,365.25/days)-1;}
     const bmdd=maxDD(DATA.bench,bStart,asof,1);
-    rows+=`<tr class="bench"><td>${DATA.benchmark_name} (벤치)</td><td class="start">${bStart||''}</td><td>—</td><td>—</td>`+
+    rows+=`<tr class="bench"><td class="name">${DATA.benchmark_name} (벤치)</td><td class="start">${bStart||''}</td><td></td><td></td>`+
       bc+`<td>${fmtPct(bcum)}</td><td>${fmtPct(bcagr)}</td><td>${fmtMDD(bmdd)}</td></tr>`;
   }
   $('#tableBox').innerHTML=`<table>${head}${rows}</table>`;
@@ -345,7 +347,7 @@ function renderSVG(lines){
   if(min<0&&max>0){const yy=y(0);g+=`<line x1="${P.l}" y1="${yy}" x2="${W-P.r}" y2="${yy}" stroke="#cbd0d6" stroke-dasharray="3 3"/>`;}
   // y축 눈금
   for(let k=0;k<=4;k++){const v=min+(max-min)*k/4;const yy=y(v);
-    g+=`<line x1="${P.l}" y1="${yy}" x2="${W-P.r}" y2="${yy}" stroke="#eef0f2"/>`+
+    g+=`<line x1="${P.l}" y1="${yy}" x2="${W-P.r}" y2="${yy}" stroke="#e2e6ea"/>`+
        `<text x="${P.l-6}" y="${yy+3}" fill="#9ca3af" font-size="10" text-anchor="end">${v.toFixed(0)}</text>`;}
   // x축 라벨(시작/끝)
   g+=`<text x="${P.l}" y="${H-8}" fill="#9ca3af" font-size="10">${dmin}</text>`+
